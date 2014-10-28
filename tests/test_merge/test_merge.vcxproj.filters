@@ -15,45 +15,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="test_merge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="program_options.cpp">
+    <ClCompile Include="..\..\esort\merge_thread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sort_thread.cpp">
+    <ClCompile Include="..\..\esort\thread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="thread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="merge_thread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="clock_ms.cpp">
+    <ClCompile Include="..\..\esort\clock_ms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="platform.h">
+    <ClInclude Include="..\..\esort\merge_thread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="program_options.h">
+    <ClInclude Include="..\..\esort\thread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sort_thread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="thread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="thread_pool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="merge_thread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="clock_ms.h">
+    <ClInclude Include="..\..\esort\clock_ms.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

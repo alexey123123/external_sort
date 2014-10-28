@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "esort", "esort\esort.vcxproj", "{4E5F14E6-45E1-49DB-ADD5-FA32B908D5E2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D1A6D1F4-AFBD-4502-AD2D-DE29407C400C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_merge", "tests\test_merge\test_merge.vcxproj", "{67127581-4379-4BAB-B40C-50D0F0EA5F68}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,8 +17,15 @@ Global
 		{4E5F14E6-45E1-49DB-ADD5-FA32B908D5E2}.Debug|Win32.Build.0 = Debug|Win32
 		{4E5F14E6-45E1-49DB-ADD5-FA32B908D5E2}.Release|Win32.ActiveCfg = Release|Win32
 		{4E5F14E6-45E1-49DB-ADD5-FA32B908D5E2}.Release|Win32.Build.0 = Release|Win32
+		{67127581-4379-4BAB-B40C-50D0F0EA5F68}.Debug|Win32.ActiveCfg = Debug|Win32
+		{67127581-4379-4BAB-B40C-50D0F0EA5F68}.Debug|Win32.Build.0 = Debug|Win32
+		{67127581-4379-4BAB-B40C-50D0F0EA5F68}.Release|Win32.ActiveCfg = Release|Win32
+		{67127581-4379-4BAB-B40C-50D0F0EA5F68}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{67127581-4379-4BAB-B40C-50D0F0EA5F68} = {D1A6D1F4-AFBD-4502-AD2D-DE29407C400C}
 	EndGlobalSection
 EndGlobal

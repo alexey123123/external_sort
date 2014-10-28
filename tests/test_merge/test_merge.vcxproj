@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{4E5F14E6-45E1-49DB-ADD5-FA32B908D5E2}</ProjectGuid>
+    <ProjectGuid>{67127581-4379-4BAB-B40C-50D0F0EA5F68}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>esort</RootNamespace>
+    <RootNamespace>test_merge</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -79,21 +79,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="clock_ms.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="merge_thread.cpp" />
-    <ClCompile Include="program_options.cpp" />
-    <ClCompile Include="sort_thread.cpp" />
-    <ClCompile Include="thread.cpp" />
+    <ClCompile Include="..\..\esort\clock_ms.cpp" />
+    <ClCompile Include="..\..\esort\merge_thread.cpp" />
+    <ClCompile Include="..\..\esort\thread.cpp" />
+    <ClCompile Include="test_merge.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="clock_ms.h" />
-    <ClInclude Include="merge_thread.h" />
-    <ClInclude Include="platform.h" />
-    <ClInclude Include="program_options.h" />
-    <ClInclude Include="sort_thread.h" />
-    <ClInclude Include="thread.h" />
-    <ClInclude Include="thread_pool.h" />
+    <ClInclude Include="..\..\esort\clock_ms.h" />
+    <ClInclude Include="..\..\esort\merge_thread.h" />
+    <ClInclude Include="..\..\esort\thread.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

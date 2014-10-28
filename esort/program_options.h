@@ -12,7 +12,7 @@ public:
 struct program_options{
 	std::string		filename;
 	unsigned long	memory_limit_b;
-	std::string		cache_path;
+	int				threads_count;
 	
 	program_options(int argc,char** argv);//throws
 	

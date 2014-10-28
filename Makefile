@@ -1,21 +1,53 @@
-CC=gcc
-CXX=g++
-CXXFLAGS+=-I include -fPIC -std=c++0x
+TARGET1 := bin/esort
+TARGET2 := bin/test_merge
 
-SOURCES = esort/main.cpp esort/program_options.cpp
-OBJECTS = $(SOURCES:.cpp=.o)
-TARGET = bin/external_sort
+LDFLAGS := -lrt -lpthread
+CFLAGS := -Wno-unused-parameter -O3 -std=c++0x
 
-.cpp.o:
-	${CXX} ${CXXFLAGS} -c $< -o $@
+Q := @
 
-$(TARGET): $(OBJECTS)
-	${CXX} $(OBJECTS) -o $(TARGET) $(LIBS)
-all:
-	${TARGET}
+CPP := g++
+
+OBJDIR := .obj
+
+SRC_ESORT := esort/main.cpp \
+		esort/program_options.cpp \
+		esort/thread.cpp \
+		esort/sort_thread.cpp \
+		esort/merge_thread.cpp \
+		esort/clock_ms.cpp
+
+SRC_TEST := tests/test_merge/test_merge.cpp \
+		esort/thread.cpp \
+		esort/merge_thread.cpp \
+		esort/clock_ms.cpp
+
+OBJS := $(addprefix $(OBJDIR)/,$(subst .cpp,.o,$(SRC_ESORT))) 
+OBJS_T := $(addprefix $(OBJDIR)/,$(subst .cpp,.o,$(SRC_TEST)))
+
+Q := @
+
+all: $(TARGET1) $(TARGET2)
+
 clean:
-	rm -f *.o $(TARGET)
+	rm -rf $(OBJDIR)
+	rm -rf $(TARGET1)
+	rm -rf $(TARGET2)
 
-strip:
-	$(STRIP) $(TARGET)
+.PHONY: all clean
+
+$(TARGET1): $(OBJS)
+	@echo "LD $(TARGET1)"
+	$(Q)$(CPP) -o $(TARGET1) $(OBJS) $(LDFLAGS)
+
+$(TARGET2): $(OBJS_T)
+	@echo "LD $(TARGET2)"
+	$(Q)$(CPP) -o $(TARGET2) $(OBJS_T) $(LDFLAGS)
+
+$(OBJDIR)/%.o: %.cpp
+	@mkdir -p `dirname $(OBJDIR)/$*.o`
+	@echo "CC $*.cpp"
+	$(Q)$(CPP) -c $*.cpp -o $(OBJDIR)/$*.o $(CFLAGS)
+	
+	@$(CPP) -MM $(CFLAGS) $*.cpp | sed -e 's|.*:|$(OBJDIR)/$*.o:|' > $(OBJDIR)/$*.d
 
