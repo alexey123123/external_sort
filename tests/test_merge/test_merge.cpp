@@ -66,7 +66,7 @@ int main(int argc,char** argv){
 		//split it
 
 		merge_thread mt;
-		mt.prepare(chunk_fnames, RESULT_FILENAME, MEMORY_LIMIT);
+		mt.prepare( merge_thread::task(chunk_fnames, RESULT_FILENAME, MEMORY_LIMIT) );
 
 		std::cout<<"merge...";
 		unsigned int start_clockms = clock_ms();

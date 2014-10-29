@@ -2,6 +2,7 @@
 #define __arguments_h__
 
 #include <string>
+#include <cstdint>
 #include <stdexcept>
 
 class program_options_exception: public std::runtime_error{
@@ -11,7 +12,7 @@ public:
 
 struct program_options{
 	std::string		filename;
-	unsigned long	memory_limit_b;
+	std::int64_t	memory_limit_b;
 	int				threads_count;
 	
 	program_options(int argc,char** argv);//throws

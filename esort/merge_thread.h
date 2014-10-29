@@ -19,17 +19,36 @@ public:
 
 	void clean();
 
-	void prepare(const std::deque<std::string>& chunks, const std::string& filename, std::uint64_t mem_limit);
+	struct task{
+		std::deque<std::string> chunks;
+		std::string output_filename;
+		std::int64_t memory_limit;
+
+		void clear();
+		bool is_clear() const;
+		task();
+		task(const std::deque<std::string>& _chunks, 
+			const std::string& _output_filename,
+			std::int64_t _memory_limit);
+	};
+	void prepare(const task& t);
 	void run();
 
 	const std::string& error_message() const
 		{return _error_message;}
 
-	std::string check_result_and_get_filename();
+	task check_result_and_get_task();
+
 
 protected:
 	void do_thread();
 private:
+	merge_thread(const merge_thread&);
+	merge_thread& operator=(const merge_thread&);
+
+
+	task _task;
+
 	std::ofstream ofstr;
 	std::vector<char> ofstr_buffer;//increase ofstream buffer for better write-perfomance
 	
@@ -55,9 +74,6 @@ private:
 	sorted_sources_queue sort_queue;
 
 	std::string _error_message;
-
-	std::string _output_filename;
-
 };
 
 #endif//__split_thread_h__

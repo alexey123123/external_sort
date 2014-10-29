@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <stdexcept>
+#include <sstream>
 #include <algorithm>
 
 #include "merge_thread.h"
@@ -22,32 +23,40 @@ void merge_thread::clean(){
 		delete (s);
 		sort_queue.pop();
 	}
+	_task.clear();
 	_error_message = "";
-	_output_filename = "";
 }
 
-void merge_thread::prepare(const std::deque<std::string>& chunks, 
-						const std::string& filename, std::uint64_t mem_limit){
+void merge_thread::prepare(const task& t){
+
 	// some cleanup
 	wait();
 	clean();
 
-	if (chunks.size()<2)
+	if (t.chunks.size()<2)
 		throw std::runtime_error("chunks < 2");
 
-	_output_filename = filename;
+
 
 	// write buffer	
-	ofstr_buffer.resize(mem_limit);
+	try{
+		ofstr_buffer.resize((std::vector<char>::size_type)t.memory_limit);
+	} 
+	catch(...){
+		std::ostringstream oss;
+		oss << "cannot allocate vector<char> for "<<t.memory_limit<<" values";
+		throw std::runtime_error(oss.str());
+	}
+	
 	std::streambuf* sb = ofstr.rdbuf();
 	sb->pubsetbuf(&ofstr_buffer[0],ofstr_buffer.size());
 
-	ofstr.open(filename, std::ios::binary);
+	ofstr.open(t.output_filename, std::ios::binary);
 	if (!ofstr)
-		throw std::runtime_error("cannot open file("+filename+") for write");
+		throw std::runtime_error("cannot open file("+t.output_filename+") for write");
 
 	// create data_source for each chunk
-	std::for_each(chunks.begin(),chunks.end(),[&](std::string c_fname){
+	std::for_each(t.chunks.begin(),t.chunks.end(),[&](std::string c_fname){
 		data_source* s = new data_source();
 
 		s->ifstr.open(c_fname, std::ios::binary);
@@ -61,6 +70,9 @@ void merge_thread::prepare(const std::deque<std::string>& chunks,
 			sort_queue.push(s); else
 			delete (s); //file is empty ?
 	});
+
+
+	_task = t;
 	
 }
 
@@ -73,8 +85,6 @@ void merge_thread::run(){
 void merge_thread::do_thread(){
 	try{
 		
-		std::uint64_t data_count = 0;
-
 		// TODO: optimization:
 		// if (sort_queue.size()==1) => write all remained data from s->ifstream >> ofstream
 
@@ -85,7 +95,7 @@ void merge_thread::do_thread(){
 
 			ofstr.write((char*)&s->value,sizeof(std::uint64_t));
 			if (!ofstr)
-				throw std::runtime_error("cannot write data to "+_output_filename);
+				throw std::runtime_error("cannot write data to "+_task.output_filename);
 		
 			// have another value? 
 			if (s->read_value())
@@ -107,13 +117,33 @@ bool merge_thread::data_source::read_value(){
 	return ifstr.gcount() == sizeof(std::uint64_t);
 }
 
-std::string merge_thread::check_result_and_get_filename(){
+merge_thread::task merge_thread::check_result_and_get_task(){
 	if (!is_terminated())
 		throw std::runtime_error("thread is not terminated");
 	if (_error_message != "")
 		throw std::runtime_error("save data error:" + _error_message);
 
-	std::string f1 = _output_filename;
-	_output_filename = "";
-	return f1;
+	task t = _task;
+	_task.clear();
+	return t;
 }
+
+void merge_thread::task::clear(){
+	output_filename = "";
+	memory_limit = 0;
+	chunks.clear();
+}
+bool merge_thread::task::is_clear() const{
+	return (chunks.size()==0) && (output_filename=="") && (memory_limit==0);
+}
+merge_thread::task::task():memory_limit(0){
+
+}
+
+merge_thread::task::task(const std::deque<std::string>& _chunks, 
+	const std::string& _output_filename,
+	std::int64_t _memory_limit):chunks(_chunks),output_filename(_output_filename),memory_limit(_memory_limit){
+
+}
+
+

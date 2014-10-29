@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <stdexcept>
+#include <sstream>
+#include <limits>
 #include "sort_thread.h"
 
 sort_thread::sort_thread():values_count(0){
@@ -11,20 +13,32 @@ sort_thread::~sort_thread(){
 }
 
 
-std::streamsize sort_thread::read(std::ifstream* ifstr, std::uint64_t count){
+std::streamsize sort_thread::read(std::ifstream* ifstr, std::streamsize count){
 	if (count % sizeof(std::uint64_t) != 0)
 		throw std::runtime_error("count is not aligned to uint64");
 
-	values_count = count / sizeof(std::uint64_t);
+	//check vector size
+
+	if (count / sizeof(std::uint64_t) > std::numeric_limits<unsigned int>().max())
+		throw std::runtime_error("values count overhead");
+
+	values_count = (unsigned int)(count / sizeof(std::uint64_t));
 	
 	if (data.size() < values_count)
-		data.resize(values_count);
+		try{
+			data.resize(values_count);
+		}
+		catch(...){
+			std::ostringstream oss;
+			oss << "cannot allocate vector<std::uint64_t> for "<<values_count<<" values";
+			throw std::runtime_error(oss.str());
+		}
+		
 
-	
 	ifstr->read((char*)&data[0], count);
 	std::streamsize readed_b = ifstr->gcount();
 	if (readed_b != count)
-		values_count = readed_b / sizeof(std::uint64_t); //possible cut data to 8 bytes
+		values_count = (std::vector<std::uint64_t>::size_type)(readed_b / sizeof(std::uint64_t)); //possible cut data to 8 bytes
 
 	return readed_b;
 }

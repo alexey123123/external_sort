@@ -30,7 +30,7 @@ public:
 
 	// delete all threads
 	void clear(){
-		for (int i=0;i!=threads.size();i++){
+		for (unsigned int i=0;i!=threads.size();i++){
 			T* t = threads[i];
 			delete t;
 		}
@@ -41,11 +41,11 @@ public:
 	// return first terminated(free-to-use) thread
 	T* find_ready(){
 		while(true){
-			for (int i=0;i!=threads.size();i++)
+			for (unsigned int i=0; i!=threads.size(); i++)
 				if (threads[i]->is_terminated())
 					return threads[i];
 			//sleep 100ms
-			//sleep_ms(100);
+			sleep_ms(100);
 		}
 	}
 

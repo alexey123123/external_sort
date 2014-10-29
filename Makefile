@@ -1,8 +1,9 @@
-TARGET1 := bin/esort
-TARGET2 := bin/test_merge
+OUT_DIR := bin
+TARGET1 := $(OUT_DIR)/esort
+TARGET2 := $(OUT_DIR)/test_merge
 
 LDFLAGS := -lrt -lpthread
-CFLAGS := -Wno-unused-parameter -O3 -std=c++0x
+CFLAGS := -Wall -Wno-unused-parameter -O3 -std=c++0x
 
 Q := @
 
@@ -36,18 +37,19 @@ clean:
 
 .PHONY: all clean
 
-$(TARGET1): $(OBJS)
+$(TARGET1): $(OUT_DIR) $(OBJS)
 	@echo "LD $(TARGET1)"
 	$(Q)$(CPP) -o $(TARGET1) $(OBJS) $(LDFLAGS)
 
-$(TARGET2): $(OBJS_T)
+$(TARGET2): $(OUT_DIR) $(OBJS_T)
 	@echo "LD $(TARGET2)"
 	$(Q)$(CPP) -o $(TARGET2) $(OBJS_T) $(LDFLAGS)
 
 $(OBJDIR)/%.o: %.cpp
 	@mkdir -p `dirname $(OBJDIR)/$*.o`
-	@echo "CC $*.cpp"
-	$(Q)$(CPP) -c $*.cpp -o $(OBJDIR)/$*.o $(CFLAGS)
+	$(CPP) $(CFLAGS) -c $*.cpp -o $(OBJDIR)/$*.o
 	
 	@$(CPP) -MM $(CFLAGS) $*.cpp | sed -e 's|.*:|$(OBJDIR)/$*.o:|' > $(OBJDIR)/$*.d
 
+$(OUT_DIR):
+	mkdir $(OUT_DIR)

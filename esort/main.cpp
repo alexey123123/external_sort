@@ -4,7 +4,6 @@
 #include <fstream>
 #include <cstdint>
 #include <cstdio>
-#include <vector>
 #include <algorithm>
 #include <iterator>
 
@@ -15,10 +14,7 @@
 #include "merge_thread.h"
 
 std::string get_chunk_filename(int num);
-
-
-#define MIN_CHUNKS_IN_THREAD 5
-#define MAX_CHUNKS_IN_THREAD 10
+void delete_files(const std::deque<std::string>& fnames);
 
 int main(int argc,char** argv){
 
@@ -27,6 +23,9 @@ int main(int argc,char** argv){
 
 	std::deque<std::string> chunk_filenames;
 	try{
+
+		unsigned int start_clockms = clock_ms();
+
 		program_options po(argc,argv);
 
 		std::ifstream fstr(po.filename, std::ios::binary );
@@ -41,9 +40,9 @@ int main(int argc,char** argv){
 		thread_pool<sort_thread> tp(po.threads_count);
 
 		// calculate chunk size
-		std::uint64_t chunk_size = po.memory_limit_b / po.threads_count;
+		std::int64_t chunk_size = po.memory_limit_b / po.threads_count;
 		chunk_size -= chunk_size % sizeof(std::uint64_t);
-
+		std::cout << chunk_size<<" bytes for 1 thread"<<std::endl;
 		int chunk_num = 0;
 		
 
@@ -63,7 +62,7 @@ int main(int argc,char** argv){
 				break;
 
 			fname = get_chunk_filename(chunk_num);
-			std::cout<<"readed "<<rbytes<<". sort and save to "<<fname<<std::endl;
+			std::cout<<"started sort of "<<rbytes<<" bytes to "<<fname<<std::endl;
 			chunk_num++;
 
 			t->sort_and_save(fname);
@@ -93,17 +92,18 @@ int main(int argc,char** argv){
 		while (chunk_filenames.size() > 1){
 			
 			// how many threads we need ?
-			int threads_count = po.threads_count;		
-
-			if (chunks_count < MAX_CHUNKS_IN_THREAD)
-				threads_count = 1;
-			else{
-				threads_count = chunks_count / MAX_CHUNKS_IN_THREAD;
-				if (chunks_count % MAX_CHUNKS_IN_THREAD > 0)
-					threads_count++;
-				if (threads_count > po.threads_count)
-					threads_count = po.threads_count;
+			unsigned int threads_count, chunks_in_thread;
+			if (chunks_count < po.threads_count){
+				//2 chunks in 1 thread
+				threads_count = chunks_count / 2;
+				threads_count += chunks_count % 2;	//+1
+				chunks_in_thread = 2;
+			} else{
+				threads_count = po.threads_count;
+				chunks_in_thread = chunks_count / threads_count;
 			}
+			
+			
 			std::uint64_t memory_for_thread = po.memory_limit_b / threads_count;
 
 			thread_pool<merge_thread> sp_pool(threads_count);
@@ -115,13 +115,14 @@ int main(int argc,char** argv){
 			while (it != chunk_filenames.end()){
 
 				std::deque<std::string> portion;
-				while ((portion.size() < MAX_CHUNKS_IN_THREAD)&&(it!=chunk_filenames.end())){
+				while ((portion.size() < chunks_in_thread)&&(it!=chunk_filenames.end())){
 					portion.push_back(*it);
 					it++;
 				}
 
 
 				if (portion.size() == 1){
+					std::cout<<"last chunk ("<<portion[0]<<") saved to next iteration"<<std::endl;
 					new_chunks.push_back( portion[0] );
 					break;
 				}
@@ -130,10 +131,11 @@ int main(int argc,char** argv){
 				if (!st)
 					throw std::runtime_error("cannot get split_thread");
 
-				std::string fname = st->check_result_and_get_filename();
-				if (fname != ""){
-					std::cout<<fname<<" ready"<<std::endl;
-					new_chunks.push_back( fname );
+				merge_thread::task prev_t = st->check_result_and_get_task();
+				if (!prev_t.is_clear()){
+					std::cout<< prev_t.output_filename <<" ready"<<std::endl;
+					new_chunks.push_back( prev_t.output_filename );
+					delete_files(prev_t.chunks);
 				}
 					
 
@@ -144,10 +146,9 @@ int main(int argc,char** argv){
 				chunk_num++;
 
 				//prepare thread
-				st->prepare(portion, result_chunk_filename, memory_for_thread);
+				st->prepare( merge_thread::task(portion, result_chunk_filename, memory_for_thread) );
 
 				std::cout<<"splitting "<<portion.size()<<" chunks to "<<result_chunk_filename<<"..."<<std::endl;
-
 				//run....
 				st->run();
 			}
@@ -156,29 +157,25 @@ int main(int argc,char** argv){
 			//fetching results
 			std::vector<merge_thread*> threads = sp_pool.get_threads();
 			std::for_each(threads.begin(),threads.end(),[&](merge_thread* t){
-				std::string fname = t->check_result_and_get_filename();
-				if (fname!=""){
-					std::cout<<fname<<" ready"<<std::endl;
-					new_chunks.push_back( fname );
-				}
+				merge_thread::task prev_t = t->check_result_and_get_task();
+				if (!prev_t.is_clear()){
+					std::cout<< prev_t.output_filename <<" ready"<<std::endl;
+					new_chunks.push_back( prev_t.output_filename );
+					delete_files(prev_t.chunks);
+				}			
 			});
 			sp_pool.clear();
-
-
-			//delete chunk files
-			std::for_each(chunk_filenames.begin(),chunk_filenames.end(),[](std::string fname){
-				if (std::remove(fname.c_str()) != 0)
-					throw std::runtime_error("cannot remove file:" + fname);
-			});
-
+			std::cout<<"Ok"<<std::endl;
 			chunk_filenames = new_chunks;		
 		}
 
 		//last chunk contains result file
 		std::string r_fname = po.filename+".sorted";
+		std::remove(r_fname.c_str());
 		if (std::rename(chunk_filenames[0].c_str(),r_fname.c_str())!=0)
 			throw std::runtime_error("cannot rename "+chunk_filenames[0]+" to "+r_fname);
-		std::cout<<"result saved to "<<r_fname<<std::endl;
+		std::cout<<"result file: "<<r_fname<<std::endl;
+		std::cout<<"generated in: "<<(double)(from_clock_ms(start_clockms))/1000<<" sec"<<std::endl;
 
 	}
 	catch(program_options_exception& ex){
@@ -198,3 +195,16 @@ std::string get_chunk_filename(int num){
 	oss << "chunk" << num << ".bin";
 	return oss.str();
 }
+
+void delete_files(const std::deque<std::string>& fnames){
+	std::for_each(fnames.begin(),fnames.end(),[](std::string fname){
+		if (std::remove(fname.c_str()) != 0)
+			throw std::runtime_error("cannot remove file:" + fname);
+		std::cout<<"deleted "<<fname<<std::endl;
+	});
+
+}
+
+
+
+

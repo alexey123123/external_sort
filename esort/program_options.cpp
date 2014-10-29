@@ -5,7 +5,7 @@
 
 #define DEFAULT_MEM_LIMIT_MB 10
 #define MIN_MEM_LIMIT 1
-#define MAX_MEM_LIMIT 4096
+#define MAX_MEM_LIMIT 0x100000
 #define DEFAULT_THREADS_COUNT 5
 #define MAX_THREADS_COUNT 100
 
@@ -18,7 +18,8 @@ program_options::program_options(int argc,char** argv):
 	filename = std::string(argv[1]);
 
 	if (argc > 2){
-		memory_limit_b = atoi(argv[2]);
+		std::istringstream iss(argv[2]);
+		iss >> memory_limit_b;
 		if ((memory_limit_b<MIN_MEM_LIMIT)||(memory_limit_b>MAX_MEM_LIMIT))
 			throw program_options_exception("incorrect memory limit");
 	}
