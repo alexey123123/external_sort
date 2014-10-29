@@ -48,6 +48,7 @@ void merge_thread::prepare(const task& t){
 		throw std::runtime_error(oss.str());
 	}
 	
+	//override ofstream buffer
 	std::streambuf* sb = ofstr.rdbuf();
 	sb->pubsetbuf(&ofstr_buffer[0],ofstr_buffer.size());
 

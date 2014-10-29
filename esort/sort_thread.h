@@ -9,6 +9,9 @@
 
 #include "thread.h"
 
+
+// Class for read data from input stream, sort and save to specified file
+
 class sort_thread: public thread{
 public:
 	sort_thread();

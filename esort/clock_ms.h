@@ -1,9 +1,7 @@
 #ifndef __clock_ms_h__
 #define __clock_ms_h__
 
-// timeout measurement, 
-// sleeping
-
+// timeout measurements, sleeping
 
 // ms count from program start
 unsigned int clock_ms();

@@ -31,6 +31,10 @@ program_options::program_options(int argc,char** argv):
 			throw program_options_exception("incorrect threads count");
 	}
 
+
+	if (memory_limit_b / threads_count < sizeof(std::uint64_t))
+		throw program_options_exception("insufficient memory for 1 thread");
+
 }
 
 std::string program_options::usage(){

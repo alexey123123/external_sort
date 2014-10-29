@@ -49,7 +49,5 @@ $(OBJDIR)/%.o: %.cpp
 	@mkdir -p `dirname $(OBJDIR)/$*.o`
 	$(CPP) $(CFLAGS) -c $*.cpp -o $(OBJDIR)/$*.o
 	
-	@$(CPP) -MM $(CFLAGS) $*.cpp | sed -e 's|.*:|$(OBJDIR)/$*.o:|' > $(OBJDIR)/$*.d
-
 $(OUT_DIR):
 	mkdir $(OUT_DIR)

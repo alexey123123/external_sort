@@ -38,7 +38,7 @@ std::streamsize sort_thread::read(std::ifstream* ifstr, std::streamsize count){
 	ifstr->read((char*)&data[0], count);
 	std::streamsize readed_b = ifstr->gcount();
 	if (readed_b != count)
-		values_count = (std::vector<std::uint64_t>::size_type)(readed_b / sizeof(std::uint64_t)); //possible cut data to 8 bytes
+		values_count = (unsigned int)(readed_b / sizeof(std::uint64_t)); //possible cut data to 8 bytes
 
 	return readed_b;
 }

@@ -13,8 +13,22 @@
 #include "sort_thread.h"
 #include "merge_thread.h"
 
+
+/*
+	Utility for sorting large amount of data with limited memory resources.
+	File split into chunks, sorted and merged.
+	Realization of algorithm: http://en.wikipedia.org/wiki/External_sorting
+*/
+
+
+
 std::string get_chunk_filename(int num);
 void delete_files(const std::deque<std::string>& fnames);
+
+
+
+
+
 
 int main(int argc,char** argv){
 
@@ -26,6 +40,7 @@ int main(int argc,char** argv){
 
 		unsigned int start_clockms = clock_ms();
 
+		//parse options
 		program_options po(argc,argv);
 
 		std::ifstream fstr(po.filename, std::ios::binary );
@@ -72,7 +87,7 @@ int main(int argc,char** argv){
 
 		std::cout<<"waiting for all threads...";
 
-		//wait all threads and fetch results
+		//wait all threads for finish and get chunk filenames
 		tp.wait_all();
 		std::vector<sort_thread*> threads = tp.get_threads();
 		std::for_each(threads.begin(),threads.end(),[&](sort_thread* t){
@@ -110,7 +125,7 @@ int main(int argc,char** argv){
 
 			std::deque<std::string> new_chunks;
 
-			//collect chunks in portions (MAX_CHUNKS_IN_THREAD) and submit to thread
+			//collect chunks in portions (chunks_in_thread) and submit to thread
 			std::deque<std::string>::iterator it = chunk_filenames.begin();
 			while (it != chunk_filenames.end()){
 
